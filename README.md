@@ -63,7 +63,7 @@ The repository includes generated VHDL for floating-point conversion and arithme
 
 These blocks are used by `fp_multiplier.v` and the butterfly arithmetic path.
 
-## Expected Data Flow
+## Data Flow
 
 1. `start` is asserted at the top level.
 2. `agu.v` selects memory addresses and twiddle indices for the current FFT stage.
