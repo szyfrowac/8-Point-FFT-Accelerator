@@ -25,7 +25,6 @@ module top_fp_multiplier (
     );
 
     // 3. Instantiate the ACTUAL FloPoCo Floating-Point Multiplier
-    // NOTE: Replace "FPMult_8_23_uidXXX" with the exact entity name found inside ZedMult_Native.vhdl
     FPMult_8_23_uid2_Freq100_uid3 fp_mult_core (
         .clk(clk),
         .X(flopoco_a),     // 34-bit input
