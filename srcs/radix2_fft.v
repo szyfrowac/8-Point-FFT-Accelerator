@@ -80,7 +80,7 @@
         IEEEFPAdd_8_23_Freq100_uid2 adder2(
             .clk(clk),
             .X(re_wire_1),
-            .Y({~re_wire_2[31], re_wire_2[30:0]}), // Flip sign for FP subtraction
+            .Y({~re_wire_2[31], re_wire_2[30:0]}),
             .R(re_wire_3) 
         );
         
@@ -109,13 +109,6 @@
             .Y(im_wire_2),
             .R(im_wire_3)
         );
-        
-        
-        // ==========================================
-        // FINAL OUTPUT STAGE (Butterfly Addition/Subtraction)
-        // X = A + (B*W)
-        // Y = A - (B*W)
-        // ==========================================
         
         // Final Real Outputs
         IEEEFPAdd_8_23_Freq100_uid2 adder1(
