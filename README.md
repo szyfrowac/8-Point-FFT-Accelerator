@@ -162,16 +162,60 @@ The waveform demonstrates:
 | Butterfly Operations | 12                          |
 | Architecture         | Memory-Based FFT Scheduling |
 
-### Future Synthesis Metrics
 
-| Metric            | Value |
-| ----------------- | ----- |
-| LUT Utilization   | TBD   |
-| Flip-Flops        | TBD   |
-| DSP Blocks        | TBD   |
-| BRAM Usage        | TBD   |
-| Maximum Frequency | TBD   |
-| Total Latency     | TBD   |
+### FPGA Resource Utilization
+
+| Resource        | Utilization |
+| --------------- | ----------- |
+| Slice LUTs      | 3,879       |
+| Slice Registers | 1,802       |
+| DSP48 Blocks    | 4           |
+| Slices          | 1,337       |
+| Bonded I/O      | 68          |
+| BUFGCTRL        | 1           |
+
+### Module-Level Resource Breakdown
+
+| Module                        | LUTs  | Registers |
+| ----------------------------- | ----- | --------- |
+| AGU (Address Generation Unit) | 35    | 7         |
+| BFU (Radix-2 Butterfly Unit)  | 2,669 | 1,083     |
+| Data RAM                      | 1,179 | 705       |
+| Twiddle ROM                   | 14    | 7         |
+
+### Timing Results
+
+| Metric                        | Value     |
+| ----------------------------- | --------- |
+| Clock Constraint              | 30 ns     |
+| Target Frequency              | 33.3 MHz  |
+| Worst Negative Slack (WNS)    | +0.410 ns |
+| Total Negative Slack (TNS)    | 0.000 ns  |
+| Failing Endpoints             | 0         |
+| Estimated Critical Path Delay | 29.59 ns  |
+
+### Timing Analysis
+
+Timing closure was successfully achieved at a target clock frequency of 33.3 MHz (30 ns clock period). Post-implementation timing analysis reported a Worst Negative Slack (WNS) of +0.410 ns and zero failing endpoints, indicating that all timing constraints were satisfied.
+
+The critical path delay was estimated to be approximately 29.59 ns. Analysis indicates that the longest timing paths occur within the floating-point butterfly datapath, particularly across chained floating-point arithmetic operations generated using FloPoCo IP cores.
+
+### Architectural Observations
+
+* The Butterfly Unit (BFU) accounts for the majority of resource utilization, reflecting the cost of IEEE-754 floating-point arithmetic.
+* DSP48 resources are utilized for floating-point multiplication operations.
+* The AGU contributes minimal area overhead while managing FFT stage sequencing, memory addressing, and twiddle-factor selection.
+* The modular architecture separates control, memory, and computation subsystems, enabling future scalability toward larger FFT sizes.
+
+### Future Optimization Opportunities
+
+* Additional pipeline stages within the butterfly datapath.
+* Timing-driven placement and routing optimization.
+* Parameterizable FFT sizes (16-, 32-, and 64-point FFTs).
+* Streaming FFT architecture support.
+* Chisel-based reimplementation for generator-driven design exploration.
+* Posit arithmetic integration for accelerator research.
+
 
 ---
 
