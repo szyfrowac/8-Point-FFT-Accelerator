@@ -1,107 +1,246 @@
-# 8-Point FFT Module (Serial Pipelined Architectures)
+# IEEE-754 Floating-Point FFT Accelerator
+
+### FSM-Controlled 8-Point Radix-2 Cooley-Tukey FFT Architecture in Verilog
+
+<p align="center">
+  <img src="./pictures/sequence.png" width="900">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Language-Verilog-blue" />
+  <img src="https://img.shields.io/badge/FFT-8--Point-green" />
+  <img src="https://img.shields.io/badge/Arithmetic-IEEE754-orange" />
+  <img src="https://img.shields.io/badge/Architecture-Radix--2-red" />
+</p>
+
+---
 
 ## Overview
 
-This project implements an IEEE-754 floating-point 8-point Cooley-Tukey FFT accelerator in Verilog.
+This project implements an IEEE-754 floating-point 8-point Fast Fourier Transform (FFT) accelerator in Verilog using the radix-2 Cooley-Tukey decomposition algorithm.
 
-The design consists of a custom FSM-based Address Generation Unit (AGU), Data RAM, Twiddle ROM, and a radix-2 butterfly computation engine. Floating-point arithmetic is implemented using FloPoCo-generated IP cores.
+Unlike a standalone butterfly implementation, this design includes a complete hardware execution framework consisting of:
 
-The AGU orchestrates butterfly scheduling, memory accesses, and twiddle-factor selection across all FFT stages.
+* FSM-Based Address Generation Unit (AGU)
+* Data RAM for intermediate storage
+* Twiddle Factor ROM
+* Radix-2 Butterfly Unit (BFU)
+* FloPoCo-generated floating-point arithmetic units
 
-The design is organized around a top-level control path and a pipelined butterfly datapath.
+The AGU serves as the control plane of the accelerator, orchestrating butterfly scheduling, memory accesses, twiddle-factor selection, and stage transitions across all FFT stages.
 
-- `top_module.v` connects the address generation unit, twiddle ROM, data RAM, and radix-2 butterfly.
-- `agu.v` is the main control FSM that sequences the 8-point FFT through three stages.
-- `radix2_fft.v` performs the complex butterfly arithmetic using floating-point adders and multipliers.
-- `data_ram.v` stores the complex input samples and updated FFT results.
-- `twiddle_memory.v` provides the twiddle factors used by each stage.
-- The FloPoCo-generated VHDL files implement the floating-point converters, adder, and multiplier blocks.
+---
 
-## Architecture Diagrams
+## Key Features
 
-### AGU FSM
+* IEEE-754 Single Precision Floating-Point Arithmetic
+* Radix-2 Cooley-Tukey FFT Algorithm
+* FSM-Based Address Generation Unit
+* Shared Butterfly Computation Engine
+* Memory-Based FFT Scheduling
+* Modular Verilog RTL Design
+* FloPoCo Floating-Point Arithmetic Integration
+* Complete Simulation and Verification Environment
 
-The address generation unit uses a small finite state machine to step through the FFT stages.
+---
 
-![AGU FSM](./pictures/AGU_FSM.png)
+## Architecture Overview
 
-### Top Module Architecture
+<p align="center">
+  <img src="./pictures/sequence.png" width="900">
+</p>
 
-The top module wires the control FSM, data memory, twiddle ROM, and butterfly pipeline together.
+The accelerator is composed of four major subsystems:
 
-![Top Module Architecture](./pictures/sequence.png)
+### Address Generation Unit (AGU)
 
-## Module Notes
+The AGU is responsible for:
 
-### `agu.v`
+* FFT stage sequencing
+* Memory address generation
+* Twiddle-factor index selection
+* Read/write control generation
+* FFT completion signaling
 
-This module generates `read`, `write`, `valid_in`, memory addresses, and the `fft_done` flag. The state flow is:
+### Data RAM
 
-- `IDLE` waits for `start`
-- `STAGE_1` processes the first butterfly group
-- `STAGE_2` processes the second butterfly group
-- `STAGE_3` processes the final butterfly group and returns to `IDLE`
+Stores:
 
-### `data_ram.v`
+* Input samples
+* Intermediate FFT values
+* Final FFT outputs
 
-This is a small 8-word complex memory for the real and imaginary parts. It supports synchronous reads and writes controlled by the AGU and butterfly pipeline.
+### Twiddle ROM
 
-### `twiddle_memory.v`
+Provides precomputed twiddle coefficients required during FFT computation.
 
-This ROM supplies twiddle factors for each stage of the 8-point FFT.
+### Butterfly Unit (BFU)
 
-### `radix2_fft.v`
+The BFU performs radix-2 butterfly operations using IEEE-754 floating-point arithmetic.
 
-This is the butterfly datapath. It multiplies the `B` input by the twiddle factor, then adds/subtracts the result from `A` to produce `X` and `Y` outputs. The design uses a valid pipeline and asserts `done` when the pipeline output is ready.
+For inputs A and B:
 
-### FloPoCo blocks
+```math
+X = A + BW
+```
 
-The repository includes generated VHDL for floating-point conversion and arithmetic:
+```math
+Y = A - BW
+```
 
-- `Input_Converter.vhdl`
-- `Output_Converter.vhdl`
-- `ZedMult.vhdl`
-- `flopoco.vhdl`
+where W represents the selected twiddle factor.
 
-These blocks are used by `fp_multiplier.v` and the butterfly arithmetic path.
+---
+
+## AGU Finite State Machine
+
+<p align="center">
+  <img src="./pictures/AGU_FSM.png" width="700">
+</p>
+
+The AGU controls FFT execution through three FFT stages.
+
+| State   | Function                     |
+| ------- | ---------------------------- |
+| IDLE    | Wait for start signal        |
+| STAGE_1 | First butterfly stage        |
+| STAGE_2 | Intermediate butterfly stage |
+| STAGE_3 | Final butterfly stage        |
+| DONE    | Assert fft_done              |
+
+The FSM generates memory addresses and twiddle-factor indices required for each butterfly computation.
+
+---
 
 ## Data Flow
 
-1. `start` is asserted at the top level.
-2. `agu.v` selects memory addresses and twiddle indices for the current FFT stage.
-3. `data_ram.v` reads a complex pair from memory.
-4. `twiddle_memory.v` provides the matching twiddle factor.
-5. `radix2_fft.v` computes the butterfly result.
-6. The updated values are written back into `data_ram.v`.
-7. `fft_done` is asserted once all three stages complete.
+1. `start` initiates FFT execution.
+2. AGU generates operand addresses and twiddle indices.
+3. Data RAM supplies complex operands.
+4. Twiddle ROM provides FFT coefficients.
+5. BFU performs radix-2 butterfly computation.
+6. Results are written back into RAM.
+7. AGU advances to the next FFT stage.
+8. `fft_done` is asserted after Stage 3 completion.
 
-## Simulation Files
+---
 
-The `sims/` directory contains testbench files for individual blocks and top-level integration.
+## Verification Methodology
 
-- `tb_fft.v` is the top-level FFT testbench used to verify the full datapath.
-- `tb_top_module.v` exercises the complete control and memory flow.
+The design was verified through module-level and system-level simulation.
 
-## Simulation Waveform
+Verification includes:
 
-The following waveform screenshot shows the FFT simulation behavior during a top-level run.
+* AGU functional verification
+* Butterfly datapath verification
+* Memory subsystem verification
+* Full FFT integration testing
 
-![FFT simulation waveform](./pictures/Simulation.png)
+### Simulation Waveform
 
-## Notes
+<p align="center">
+  <img src="./pictures/Simulation.png" width="1000">
+</p>
 
-The VHDL sources rely on generated FloPoCo modules, so simulation/synthesis must include those files in the compile order.
+The waveform demonstrates:
 
-The memory initialization files referenced by the RAM and ROM modules should be present when running simulations.
+* Stage transitions
+* Memory read/write operations
+* Butterfly completion events
+* FFT completion signaling
 
-## Acknowledgment: FloPoCo Adder and Multiplier Modules
+---
 
-This project uses **FloPoCo-generated arithmetic modules**, including adder and multiplier components.
+## Results
 
-**FloPoCo is open-source, and contributions are welcome.**
+| Metric               | Value                       |
+| -------------------- | --------------------------- |
+| FFT Size             | 8 Point                     |
+| Algorithm            | Radix-2 Cooley-Tukey        |
+| Precision            | IEEE-754 Single Precision   |
+| FFT Stages           | 3                           |
+| Butterfly Operations | 12                          |
+| Architecture         | Memory-Based FFT Scheduling |
 
-FloPoCo is distributed under the **FloPoCo license**. It is a modified AGPL, so that the code generated by FloPoCo is itself available under **LGPL**.
+### Future Synthesis Metrics
 
-## Notes
+| Metric            | Value |
+| ----------------- | ----- |
+| LUT Utilization   | TBD   |
+| Flip-Flops        | TBD   |
+| DSP Blocks        | TBD   |
+| BRAM Usage        | TBD   |
+| Maximum Frequency | TBD   |
+| Total Latency     | TBD   |
 
-Please refer to the FloPoCo project and license terms for full details on usage and redistribution.
+---
+
+## Design Tradeoffs
+
+| Design Choice             | Motivation                            |
+| ------------------------- | ------------------------------------- |
+| Shared Butterfly Engine   | Reduced hardware utilization          |
+| FSM-Based Scheduling      | Simplified control path               |
+| Floating-Point Arithmetic | Improved numerical accuracy           |
+| Memory-Based Execution    | Flexible staged FFT processing        |
+| 8-Point FFT               | Baseline architecture for scalability |
+
+---
+
+## Repository Structure
+
+```text
+.
+├── srcs/
+│   ├── top_module.v
+│   ├── agu.v
+│   ├── radix2_fft.v
+│   ├── data_ram.v
+│   └── twiddle_memory.v
+│   ├── Input_Converter.vhdl
+│   ├── Output_Converter.vhdl
+│   ├── ZedMult.vhdl
+│   └── flopoco.vhdl
+│
+├── sims/
+│   ├── tb_fft.v
+│   └── tb_top_module.v
+│
+├── pictures/
+│   ├── sequence.png
+│   ├── AGU_FSM.png
+│   └── Simulation.png
+│
+│
+└── README.md
+```
+
+---
+
+## Future Work
+
+* Parameterizable FFT Sizes (16, 32, 64 Point)
+* Streaming FFT Architecture
+* Chisel-Based Reimplementation
+* Posit Arithmetic Support
+* AXI4 Interface Integration
+* FPGA Resource Optimization
+* AI Accelerator Integration (Gemmini-like Architectures)
+
+---
+
+## Acknowledgements
+
+This project utilizes floating-point arithmetic units generated using FloPoCo.
+
+FloPoCo is an open-source arithmetic core generator. Generated arithmetic modules are included in accordance with FloPoCo licensing terms.
+
+For more information:
+
+https://flopoco.org
+
+---
+
+## Author
+
+**Bala Phanikar Challa**
