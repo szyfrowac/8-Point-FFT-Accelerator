@@ -76,11 +76,14 @@ These blocks are used by `fp_multiplier.v` and the butterfly arithmetic path.
 
 The `sims/` directory contains testbench files for individual blocks and top-level integration.
 
+- `tb_fft.v` is the top-level FFT testbench used to verify the full datapath.
+- `tb_top_module.v` exercises the complete control and memory flow.
+
 ## Simulation Waveform
 
 The following waveform screenshot shows the FFT simulation behavior during a top-level run.
 
-![Simulation Waveform](Screenshot%20from%202026-05-31%2022-17-09.png)
+![FFT simulation waveform](Screenshot%20from%202026-05-31%2022-17-09.png)
 
 ## Notes
 
