@@ -1,8 +1,7 @@
-# 8-Point FFT Module (Parallel and Serial Pipelined Architectures)
+# 8-Point FFT Module (Serial Pipelined Architectures)
 
 This repository contains an implementation of an **8-point FFT module** in:
 - **Serial pipelined architecture**
-- **Parallel pipelined architecture**
 
 ## Overview
 
