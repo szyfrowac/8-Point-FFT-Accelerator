@@ -20,13 +20,13 @@ The design is organized around a top-level control path and a pipelined butterfl
 
 The address generation unit uses a small finite state machine to step through the FFT stages.
 
-![AGU FSM](AGU_FSM.png)
+![AGU FSM](./pictures/AGU_FSM.png)
 
 ### Top Module Architecture
 
 The top module wires the control FSM, data memory, twiddle ROM, and butterfly pipeline together.
 
-![Top Module Architecture](sequence.png)
+![Top Module Architecture](./pictures/sequence.png)
 
 ## Module Notes
 
@@ -83,7 +83,7 @@ The `sims/` directory contains testbench files for individual blocks and top-lev
 
 The following waveform screenshot shows the FFT simulation behavior during a top-level run.
 
-![FFT simulation waveform](Screenshot%20from%202026-05-31%2022-17-09.png)
+![FFT simulation waveform](./pictures/Simulation.png)
 
 ## Notes
 
