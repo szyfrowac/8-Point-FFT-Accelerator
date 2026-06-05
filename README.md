@@ -3,7 +3,7 @@
 ### FSM-Controlled 8-Point Radix-2 Cooley-Tukey FFT Architecture in Verilog
 
 <p align="center">
-  <img src="./pictures/sequence.png" width="900">
+  <img src="./pictures/Architecture.png" width="900">
 </p>
 
 <p align="center">
