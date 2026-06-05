@@ -1,9 +1,12 @@
 # 8-Point FFT Module (Serial Pipelined Architectures)
 
-This repository contains an implementation of an **8-point FFT module** in:
-- **Serial pipelined architecture**
-
 ## Overview
+
+This project implements an IEEE-754 floating-point 8-point Cooley-Tukey FFT accelerator in Verilog.
+
+The design consists of a custom FSM-based Address Generation Unit (AGU), Data RAM, Twiddle ROM, and a radix-2 butterfly computation engine. Floating-point arithmetic is implemented using FloPoCo-generated IP cores.
+
+The AGU orchestrates butterfly scheduling, memory accesses, and twiddle-factor selection across all FFT stages.
 
 The design is organized around a top-level control path and a pipelined butterfly datapath.
 
